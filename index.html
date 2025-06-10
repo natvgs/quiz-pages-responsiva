@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seu colchão te escolheria?</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { 
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    section {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: rgb(222, 220, 232);
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+    }
+
+    .video-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .video-background {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .content {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 25px;
+      border-radius: 10px;
+      max-width: 800px;
+      width: 95%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 15px 0;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: #eee;
+    }
+
+    .btn {
+      margin-top: 1rem;
+      padding: 12px 25px;
+      background: #110d81;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background: #22026c;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-whatsapp {
+      background: #25D366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+      margin-top: 20px;
+      padding: 15px 25px;
+    }
+
+    .btn-whatsapp:hover {
+      background: #128C7E;
+    }
+
+    .whatsapp-tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .whatsapp-tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .whatsapp-tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Estilos do Quiz */
+    .question {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.3rem;
+      color: #fff;
+      width: 100%;
+    }
+
+    .options-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .options {
+      text-align: left;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    .options label {
+      display: block;
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      user-select: none;
+      color: #eee3e3;
+      line-height: 1.4;
+      padding-top: 5px;
+    }
+
+    .options label::before {
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #ccc;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+
+    .options label:hover::before {
+      border-color: #110d81;
+    }
+
+    input[type="radio"]:checked + label::before {
+      background-color: #110d81;
+      border-color: #110d81;
+    }
+
+    .quiz-step {
+      display: none;
+      width: 100%;
+      align-items: center;
+    }
+
+    .quiz-step.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Estilo do Resultado */
+    #resultadoFinal {
+      text-align: center;
+      width: 100%;
+    }
+
+    .result-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .result-title {
+      color: #0e1171;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .result-description {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .content {
+        padding: 20px;
+        width: 100%;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+      
+      .question {
+        font-size: 1.1rem;
+      }
+      
+      .options label {
+        font-size: 1rem;
+        padding-left: 35px;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+      
+      .btn-whatsapp {
+        padding: 12px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      section {
+        padding: 10px;
+      }
+      
+      .content {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.3rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+      
+      .options label {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Seção 1 - Introdução -->
+  <section id="introSection">
+    <div class="video-container">
+      <video class="video-background" autoplay loop muted playsinline>
+        <source src="videos/intro.mp4" type="video/mp4">
+        <img src="videos/fallback-intro.jpg" alt="Background alternativo">
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+    <div class="content">
+      <h1>Você está dormindo MENOS do que merece?</h1>
+      <p>Descubra aqui se seu colchão te escolheria.</p>
+      <button class="btn" onclick="startQuiz()">Iniciar Quiz</button>
+    </div>
+  </section>
+
+  <!-- Seção 2: Quiz -->
+  <section id="quizSection" style="display: none;">
+    <div class="video-container">
+      <video class="video-background" autoplay loop muted playsinline>
+        <source src="videos/quiz.mp4" type="video/mp4">
+        <img src="videos/fallback-quiz.jpg" alt="Background alternativo">
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+    <div class="content">
+      <form id="quizForm" style="width: 100%;">
+        <!-- Pergunta 1 -->
+        <div class="quiz-step active" id="step1">
+          <div class="question">1. Como você se sente ao acordar?</div>
+          <div class="options-container">
+            <div class="options">
+              <input type="radio" id="q1a" name="q1" value="10" required>
+              <label for="q1a">A) Renovado e pronto para o dia!</label>
+              
+              <input type="radio" id="q1b" name="q1" value="20">
+              <label for="q1b">B) Sonolento e querendo mais 5 minutinhos</label>
+              
+              <input type="radio" id="q1c" name="q1" value="30">
+              <label for="q1c">C) Confuso sem saber que dia é hoje</label>
+              
+              <input type="radio" id="q1d" name="q1" value="40">
+              <label for="q1d">D) Como se nem tivesse dormido direito</label>
+            </div>
+          </div>
+          <button type="button" class="btn" onclick="nextStep(1)">Próxima</button>
+        </div>
+
+        <!-- Pergunta 2 -->
+        <div class="quiz-step" id="step2">
+          <div class="question">2. O que mais atrapalha seu sono?</div>
+          <div class="options-container">
+            <div class="options">
+              <input type="radio" id="q2a" name="q2" value="10" required>
+              <label for="q2a">A) Nada, durmo bem sempre</label>
+              
+              <input type="radio" id="q2b" name="q2" value="20">
+              <label for="q2b">B) Luzes e barulho</label>
+              
+              <input type="radio" id="q2c" name="q2" value="30">
+              <label for="q2c">C) Sonhos estranhos e pesadelos</label>
+              
+              <input type="radio" id="q2d" name="q2" value="40">
+              <label for="q2d">D) Ansiedade e pensamentos sem fim</label>
+            </div>
+          </div>
+          <button type="button" class="btn" onclick="nextStep(2)">Próxima</button>
+        </div>
+
+        <!-- Pergunta 3 -->
+        <div class="quiz-step" id="step3">
+          <div class="question">3. Seu colchão atual é...</div>
+          <div class="options-container">
+            <div class="options">
+              <input type="radio" id="q3a" name="q3" value="10" required>
+              <label for="q3a">A) Perfeito, amo ele!</label>
+              
+              <input type="radio" id="q3b" name="q3" value="20">
+              <label for="q3b">B) Poderia ser mais confortável</label>
+              
+              <input type="radio" id="q3c" name="q3" value="30">
+              <label for="q3c">C) Já passou da hora de trocar</label>
+              
+              <input type="radio" id="q3d" name="q3" value="40">
+              <label for="q3d">D) Um mistério... nem sei mais se ele ajuda ou atrapalha</label>
+            </div>
+          </div>
+          <button type="button" class="btn" onclick="calcularPontuacao()">Ver Resultado</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Seção 3: Resultado -->
+  <section id="resultSection" style="display: none;">
+    <div class="video-container">
+      <video class="video-background" autoplay loop muted playsinline>
+        <source src="videos/resultado.mp4" type="video/mp4">
+        <img src="videos/fallback-resultado.jpg" alt="Background alternativo">
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+    <div class="content">
+      <div id="resultadoFinal" style="width: 100%;"></div>
+      <div class="whatsapp-tooltip">
+        <a id="whatsappLink" href="#" class="btn btn-whatsapp">
+          <i class="fab fa-whatsapp"></i> Fale com nosso especialista
+        </a>
+        <span class="tooltiptext">Atendimento exclusivo para você. Clique e fale conosco!</span>
+      </div>
+      <button class="btn" onclick="voltarAoInicio()">Voltar ao Início</button>
+    </div>
+  </section>
+
+  <script>
+    // Configurações do WhatsApp
+    const whatsappNumber = "553496963134"; // SUBSTITUA pelo seu número de WhatsApp
+    const preDefinedMessage = encodeURIComponent("Oi! Acabei de fazer o quiz e vim escolher meu colchão ideal.");
+    const greetingMessage = encodeURIComponent("Olá! Sou seu Guia do Conforto e estou aqui para ajudar você a encontrar o colchão perfeito para suas necessidades. Como ajudar hoje?");
+    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${preDefinedMessage}`;
+    
+    document.getElementById('whatsappLink').href = whatsappLink;
+
+    function startQuiz() {
+      document.getElementById("introSection").style.display = "none"; 
+      document.getElementById("quizSection").style.display = "flex";
+      document.getElementById("resultSection").style.display = "none";  
+      
+      const quizVideo = document.querySelector('#quizSection .video-background');
+      if (quizVideo) {
+        quizVideo.currentTime = 0;
+        quizVideo.play();
+      }
+    }
+
+    function nextStep(currentStep) {
+      const atual = document.getElementById(`step${currentStep}`);
+      const proxima = document.getElementById(`step${currentStep + 1}`);
+
+      const radios = atual.querySelectorAll('input[type="radio"]');
+      let respondido = false;
+      radios.forEach(radio => { if (radio.checked) respondido = true; });
+
+      if (!respondido) {
+        alert("Por favor, selecione uma opção antes de continuar.");
+        return;
+      }
+
+      atual.classList.remove("active");
+      if (proxima) {
+        proxima.classList.add("active");
+      }
+    }
+
+    function calcularPontuacao() {
+      const form = document.getElementById("quizForm");
+      const q1 = parseInt(document.querySelector('input[name="q1"]:checked')?.value || 0);
+      const q2 = parseInt(document.querySelector('input[name="q2"]:checked')?.value || 0);
+      const q3 = parseInt(document.querySelector('input[name="q3"]:checked')?.value || 0);
+      
+      const total = q1 + q2 + q3;
+
+      let resultadoHTML = '';
+      
+      if (total >= 30 && total <= 50) {
+        resultadoHTML = `
+          <div class="result-container">
+            <h2 class="result-title">Sono dos Sonhos</h2>
+            <p class="result-description">Você dorme bem e já encontrou o colchão certo! Mas será que um upgrade no conforto te deixaria ainda melhor?</p>
+            <p>Nossos colchões premium podem elevar sua experiência de sono para outro nível, com materiais de alta qualidade e tecnologias avançadas.</p>
+          </div>
+        `;
+      } else if (total >= 60 && total <= 80) {
+        resultadoHTML = `
+          <div class="result-container">
+            <h2 class="result-title">Sono Sensível</h2>
+            <p class="result-description">Seu sono precisa de mais conforto! Pequenos detalhes fazem toda a diferença na qualidade do seu descanso.</p>
+            <p>Temos colchões especialmente projetados para pessoas com sensibilidade ao sono, com camadas de conforto que se adaptam ao seu corpo.</p>
+          </div>
+        `;
+      } else if (total >= 90 && total <= 110) {
+        resultadoHTML = `
+          <div class="result-container">
+            <h2 class="result-title">Sono Bagunçado</h2>
+            <p class="result-description">Seu ciclo de sono está todo desregulado! Talvez seu colchão atual não esteja oferecendo o suporte necessário.</p>
+            <p>Nossos colchões ortopédicos podem ajudar a alinhar sua coluna e melhorar significativamente a qualidade do seu sono.</p>
+          </div>
+        `;
+      } else if (total === 120) {
+        resultadoHTML = `
+          <div class="result-container">
+            <h2 class="result-title">Sono Lutador</h2>
+            <p class="result-description">Você batalha para dormir! Isso pode ser culpa do colchão errado, que não oferece o conforto e suporte que você precisa.</p>
+            <p>Nossos especialistas podem ajudar a encontrar a solução perfeita para transformar suas noites de sono.</p>
+          </div>
+        `;
+      }
+
+      document.getElementById("resultadoFinal").innerHTML = resultadoHTML;
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "flex";
+      
+      // Atualizar o link do WhatsApp com o resultado
+      const resultMessage = encodeURIComponent(`Resultado do quiz: ${document.querySelector('.result-title').textContent}`);
+      const finalWhatsappLink = `https://wa.me/${whatsappNumber}?text=${preDefinedMessage}%0A%0A${resultMessage}`;
+      document.getElementById('whatsappLink').href = finalWhatsappLink;
+    }
+
+    function voltarAoInicio() {
+      document.getElementById("introSection").style.display = "flex";
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "none";
+      
+      // Resetar o quiz
+      document.querySelectorAll('.quiz-step').forEach(step => {
+        step.classList.remove("active");
+      });
+      document.getElementById("step1").classList.add("active");
+      document.getElementById("quizForm").reset();
+    }
+  </script>
+</body>
+</html>                     
